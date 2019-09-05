@@ -1,16 +1,20 @@
 package server
 
 import (
+	"../models"
+	"../strutils"
 	"context"
 	"encoding/json"
 	"github.com/gorilla/mux"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"log"
 	"net/http"
 	"time"
 )
 
 func createTour(w http.ResponseWriter, r *http.Request) {
-	var tour Tour
+	var tour models.Tour
 	w.Header().Set("Content-Type", "application/json")
 	json.NewDecoder(r.Body).Decode(&tour)
 
@@ -28,7 +32,7 @@ func createTour(w http.ResponseWriter, r *http.Request) {
 
 func getTour(w http.ResponseWriter, r *http.Request) {
 	emptySlice := make([]string, 0)
-	var tour Tour
+	var tour models.Tour
 	w.Header().Set("Content-Type", "application/json")
 	data := mux.Vars(r)
 	objID, err := primitive.ObjectIDFromHex(string(data["id"]))
@@ -48,7 +52,7 @@ func getTour(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		setLoadedToursCookie(w, emptySlice)
 	}
-	if !stringInSlice(tour.ID.Hex(), loadedToursID) {
+	if !strutils.StringInSlice(tour.ID.Hex(), loadedToursID) {
 		loadedToursID = append(loadedToursID, tour.ID.Hex())
 		setLoadedToursCookie(w, loadedToursID)
 	}
@@ -58,7 +62,7 @@ func getTour(w http.ResponseWriter, r *http.Request) {
 
 func getAllTours(w http.ResponseWriter, r *http.Request) {
 	IDs := make([]string, 0)
-	tours := make([]Tour, 0)
+	tours := make([]models.Tour, 0)
 
 	w.Header().Set("Content-Type", "application/json")
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
@@ -83,7 +87,7 @@ func getAllTours(w http.ResponseWriter, r *http.Request) {
 
 // Gets "loadedTours" cookie and makes slice with tours which IDs are not in "loadedTours"
 func getUnloadedTours(w http.ResponseWriter, r *http.Request) {
-	tours := make([]Tour, 0)
+	tours := make([]models.Tour, 0)
 	IDs := make([]string, 0)
 	found := false
 	w.Header().Set("Content-Type", "application/json")
@@ -103,7 +107,7 @@ func getUnloadedTours(w http.ResponseWriter, r *http.Request) {
 
 	ctx, _ = context.WithTimeout(context.Background(), 10*time.Second)
 	for cur.Next(ctx) {
-		var tour Tour
+		var tour models.Tour
 		err := cur.Decode(&tour)
 		if err != nil {
 			log.Panic(err)
@@ -123,8 +127,8 @@ func getUnloadedTours(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(tours)
 }
 func updateTour(w http.ResponseWriter, r *http.Request) {
-	var updateTour Tour
-	var updatedTour Tour
+	var updateTour models.Tour
+	var updatedTour models.Tour
 	w.Header().Set("Content-Type", "application/json")
 
 	json.NewDecoder(r.Body).Decode(&updateTour)
@@ -174,7 +178,7 @@ func deleteTour(w http.ResponseWriter, r *http.Request) {
 		i++
 	}
 
-	loadedToursID = removeString(loadedToursID, i)
+	loadedToursID = strutils.RemoveString(loadedToursID, i)
 	setLoadedToursCookie(w, loadedToursID)
 	w.WriteHeader(200)
 }

@@ -1,6 +1,6 @@
 package strutils
 
-func stringInSlice(a string, list []string) bool {
+func StringInSlice(a string, list []string) bool {
 	for _, b := range list {
 		if b == a {
 			return true
@@ -9,7 +9,7 @@ func stringInSlice(a string, list []string) bool {
 	return false
 }
 
-func removeString(a []string, i int) []string {
+func RemoveString(a []string, i int) []string {
 	emptySlice := make([]string, 0)
 	if len(a) == 1 {
 		return emptySlice

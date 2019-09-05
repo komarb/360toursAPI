@@ -1,14 +1,13 @@
 package main
 
 import (
-	"github.com/komarb/360toursAPI/db"
-	"github.com/gorilla/mux"
-	"net/http"
+	"./config"
+	"./server"
 )
 
-
-
 func main() {
-	dbInit()
-	
+	config := config.GetConfig()
+	app := &server.App{}
+	app.Init(config)
+	app.Run(":8080")
 }
